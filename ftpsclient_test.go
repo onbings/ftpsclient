@@ -57,7 +57,7 @@ func (s *FtpClientTestSuite) SetUpTest(c *C) {
 	FtpsClientParam_X.SecureFtp_B = false
 	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
 	FtpsClientParam_X.TargetPort_U16 = 21
-	FtpsClientParam_X.Debug_B = true
+	FtpsClientParam_X.Debug_B = false
 	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
 	FtpsClientParam_X.ConnectTimeout_S64 = 2000
 	FtpsClientParam_X.CtrlTimeout_S64 = 1000
@@ -184,15 +184,13 @@ func (s *FtpClientTestSuite) TestFileList(c *C) {
 		if Err != nil {
 			c.Fatalf("List error: %v\n", Err)
 		}
-		/*
-			for _, DirEntry_X := range pDirEntry_X {
-							log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
-			}
-		*/
+		//			for _, DirEntry_X := range pDirEntry_X {
+		//						log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
+		//		}
+
 	}
 }
 
-/*
 func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 	Err := uploadFile(LOCAL_PATH, HOST_PATH)
 	if Err != nil {
@@ -204,7 +202,7 @@ func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 		}
 	}
 }
-*/
+
 func uploadFile(_LocalPath_S, _HostPath_S string) error {
 
 	pData_U8, rRts := ioutil.ReadFile(_LocalPath_S)

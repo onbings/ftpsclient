@@ -346,7 +346,6 @@ func (this *FtpsClient) RetrieveFile(_RemoteFilepath_S, _LocalFilepath_S string)
 		} else {
 			this.CloseFtpDataChannel()
 		}
-		_, _, rRts = this.CloseFtpDataChannel()
 	}
 	return
 }
