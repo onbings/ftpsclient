@@ -16,8 +16,8 @@ package ftpsclient
 import (
 	//	"fmt"
 	. "gopkg.in/check.v1"
-	_ "io/ioutil"
-	_ "log"
+	"io/ioutil"
+	"log"
 	"testing"
 )
 
@@ -97,6 +97,7 @@ const (
 	IOFILE    = "ftpsclient.go"
 )
 
+/*
 func (s *FtpClientTestSuite) TestDirectory(c *C) {
 	Directory_S, Err := GL_FtpsClientPtr_X.GetWorkingDirectory()
 	if Err != nil {
@@ -145,76 +146,41 @@ func (s *FtpClientTestSuite) TestDisconnect(c *C) {
 		c.Fatalf("Disconnect error: %v\n", Err)
 	}
 	s.SetUpTest(c)
+}
+*/
+func (s *FtpClientTestSuite) TestFileUpload(c *C) {
 
-	/*
-		Err = GL_FtpsClientPtr_X.MakeDirectory("bha")
-		if Err != nil {
-			panic(Err)
-		}
+	pData_U8, Err := ioutil.ReadFile("ftpsclient.go")
+	if Err != nil {
+		c.Fatalf("ReadFile error: %v\n", Err)
+	}
+	Err = GL_FtpsClientPtr_X.StoreFile("test2", pData_U8)
+	if Err != nil {
+		c.Fatalf("StoreFile error: %v\n", Err)
+	}
 
-		Err = GL_FtpsClientPtr_X.ChangeWorkingDirectory("Seq")
-		if Err != nil {
-			panic(Err)
-		}
+}
 
-		Directory_S, Err = GL_FtpsClientPtr_X.GetWorkingDirectory()
-		if Err != nil {
-			panic(Err)
-		}
-		log.Printf("Current working Directory_S: %s", Directory_S)
+func (s *FtpClientTestSuite) TestFileDownload(c *C) {
+	Err := GL_FtpsClientPtr_X.RetrieveFile("test2", "test3")
+	if Err != nil {
+		c.Fatalf("RetrieveFile error: %v\n", Err)
+	}
+}
+func (s *FtpClientTestSuite) TestFileList(c *C) {
+	pDirEntry_X, Err := GL_FtpsClientPtr_X.List()
+	if Err != nil {
+		c.Fatalf("List error: %v\n", Err)
+	}
+	for _, DirEntry_X := range pDirEntry_X {
+		log.Println(DirEntry_X)
+	}
+}
 
-		Err = GL_FtpsClientPtr_X.ChangeWorkingDirectory("..")
-		if Err != nil {
-			panic(Err)
-		}
+func (s *FtpClientTestSuite) TestFileDelete(c *C) {
+	Err := GL_FtpsClientPtr_X.DeleteFile("test2")
+	if Err != nil {
+		c.Fatalf("DeleteFile error: %v\n", Err)
+	}
 
-		Directory_S, Err = GL_FtpsClientPtr_X.GetWorkingDirectory()
-		if Err != nil {
-			panic(Err)
-		}
-		log.Printf("Current working Directory_S: %s", Directory_S)
-
-		Err = GL_FtpsClientPtr_X.RemoveDirectory("bha")
-		if Err != nil {
-			panic(Err)
-		}
-
-		Directory_S, Err = GL_FtpsClientPtr_X.GetWorkingDirectory()
-		if Err != nil {
-			panic(Err)
-		}
-		log.Printf("Current working Directory_S: %s", Directory_S)
-
-		pData_U8, Err := ioutil.ReadFile("ftpsclient.go")
-		if Err != nil {
-			panic(Err)
-		}
-		Err = GL_FtpsClientPtr_X.StoreFile("test2", pData_U8)
-		if Err != nil {
-			panic(Err)
-		}
-
-		Err = GL_FtpsClientPtr_X.RetrieveFile("test2", "test3")
-		if Err != nil {
-			panic(Err)
-		}
-
-		pDirEntry_X, Err := GL_FtpsClientPtr_X.List()
-		if Err != nil {
-			panic(Err)
-		}
-		for _, DirEntry_X := range pDirEntry_X {
-			log.Println(DirEntry_X)
-		}
-
-		Err = GL_FtpsClientPtr_X.DeleteFile("test2")
-		if Err != nil {
-			panic(Err)
-		}
-
-		Err = GL_FtpsClientPtr_X.Disconnect()
-		if Err != nil {
-			panic(Err)
-		}
-	*/
 }

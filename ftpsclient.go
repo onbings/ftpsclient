@@ -235,7 +235,7 @@ func (this *FtpsClient) ReadFtpDataChannel(_DataArray_U8 []uint8) (rWaitDuration
 	StartWaitTime_X = time.Now()
 	NbMaxToRead_i := len(_DataArray_U8)
 	rNbRead_i = 0
-	rRts = this.dataConnection_I.SetDeadline(time.Now().Add(this.FtpsParam_X.DataTimeout_S64))
+	rRts = this.dataConnection_I.SetDeadline(time.Now().Add(time.Duration(this.FtpsParam_X.DataTimeout_S64) * time.Millisecond))
 	//	fmt.Printf("now %v to %v\n", time.Now(), time.Now().Add(this.FtpsParam_X.DataTimeout_S64))
 
 	if rRts == nil {
@@ -270,7 +270,7 @@ func (this *FtpsClient) ReadFtpDataChannel(_DataArray_U8 []uint8) (rWaitDuration
 		}
 
 	} else {
-		fmt.Printf("err2 %s\n", rRts.Error())
+		//		fmt.Printf("err2 %s\n", rRts.Error())
 	}
 	return
 }
@@ -287,14 +287,14 @@ func (this *FtpsClient) List() (rDirEntryArray_X []DirEntry, rRts error) {
 	var DirEntryPtr_X *DirEntry
 	var Line_S string
 	rDirEntryArray_X = nil
-	rRts = this.sendRequestToFtpServerDataConn("LIST -a", 150)
+	rRts = this.sendRequestToFtpServerDataConn("LIST", 150)
 	if rRts == nil {
 		pReader_O := bufio.NewReader(this.dataConnection_I)
 		for {
 			Line_S, rRts = pReader_O.ReadString('\n')
 			if rRts == nil {
 				//if rRts == io.EOF {				break			}
-
+				this.debugInfo("[LIST] " + Line_S)
 				DirEntryPtr_X, rRts = this.parseEntryLine(Line_S)
 				rDirEntryArray_X = append(rDirEntryArray_X, *DirEntryPtr_X)
 			} else {
@@ -302,6 +302,7 @@ func (this *FtpsClient) List() (rDirEntryArray_X []DirEntry, rRts error) {
 			}
 
 		}
+		this.debugInfo("[LIST] End")
 		_, _, rRts = this.readFtpServerResponse(226)
 		this.dataConnection_I.Close()
 	}
@@ -319,7 +320,10 @@ func (this *FtpsClient) StoreFile(_RemoteFilepath_S string, _DataArray_U8 []byte
 			if len(_DataArray_U8) != Count_i {
 				rRts = ErrIoError
 			} else {
-				_, _, rRts = this.readFtpServerResponse(226)
+				rRts = this.dataConnection_I.Close()
+				if rRts == nil {
+					_, _, rRts = this.readFtpServerResponse(226)
+				}
 			}
 		}
 		this.dataConnection_I.Close()
@@ -396,8 +400,7 @@ func (this *FtpsClient) sendRequestToFtpServer(_Request_S string, _ExpectedReply
 	rRts = this.isConnEstablished()
 	if rRts == nil {
 		this.debugInfo("[FTP CMD] " + _Request_S)
-		rRts = this.ctrlConnection_I.SetDeadline(time.Now().Add(this.FtpsParam_X.CtrlTimeout_S64))
-		this.debugInfo("[FTP CMD] To " + fmt.Sprintf("%d", this.FtpsParam_X.CtrlTimeout_S64))
+		rRts = this.ctrlConnection_I.SetDeadline(time.Now().Add(time.Duration(this.FtpsParam_X.CtrlTimeout_S64) * time.Millisecond))
 
 		if rRts == nil {
 			_, rRts = this.textProtocolPtr_X.Cmd(_Request_S)
@@ -413,10 +416,9 @@ func (this *FtpsClient) readFtpServerResponse(_ExpectedReplyCode_i int) (rReplyC
 	rResponse_S = ""
 	rRts = this.isConnEstablished()
 	if rRts == nil {
-		rRts = this.ctrlConnection_I.SetDeadline(time.Now().Add(this.FtpsParam_X.CtrlTimeout_S64))
+		rRts = this.ctrlConnection_I.SetDeadline(time.Now().Add(time.Duration(this.FtpsParam_X.CtrlTimeout_S64) * time.Millisecond))
 		if rRts == nil {
 			rReplyCode_i, rResponse_S, rRts = this.textProtocolPtr_X.ReadResponse(_ExpectedReplyCode_i)
-
 			this.debugInfo(fmt.Sprintf("[FTP REP] %d/%d (%s)", rReplyCode_i, _ExpectedReplyCode_i, rResponse_S))
 		}
 	}
