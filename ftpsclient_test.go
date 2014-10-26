@@ -15,10 +15,9 @@ package ftpsclient
 
 import (
 	//	"fmt"
-	"fmt"
 	. "gopkg.in/check.v1"
 	"io/ioutil"
-	"log"
+	//	"log"
 	"testing"
 )
 
@@ -32,6 +31,11 @@ type FtpClientTestSuite struct{}
 var _ = Suite(&FtpClientTestSuite{})
 
 //-- GoCheck specific initialization --------------------------------------
+const (
+	HOST_PATH       = "copyofftpsclient.go.bha"
+	LOCAL_PATH      = "ftpsclient.go"
+	LOCAL_PATH_RETR = "ftpsclientfromftp.bha"
+)
 
 var (
 	GL_FtpsClientPtr_X *FtpsClient
@@ -53,7 +57,7 @@ func (s *FtpClientTestSuite) SetUpTest(c *C) {
 	FtpsClientParam_X.SecureFtp_B = false
 	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
 	FtpsClientParam_X.TargetPort_U16 = 21
-	FtpsClientParam_X.Debug_B = true
+	FtpsClientParam_X.Debug_B = false
 	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
 	FtpsClientParam_X.ConnectTimeout_S64 = 2000
 	FtpsClientParam_X.CtrlTimeout_S64 = 1000
@@ -74,6 +78,7 @@ func (s *FtpClientTestSuite) SetUpTest(c *C) {
 	if GL_FtpsClientPtr_X.FtpsParam_X.Id_U32 != CONID {
 		c.Fatalf("Bad param %v instead of %v\n", GL_FtpsClientPtr_X.FtpsParam_X.Id_U32, CONID)
 	}
+	GL_FtpsClientPtr_X.DeleteFile(HOST_PATH)
 }
 
 //Run after each test or benchmark runs.
@@ -90,6 +95,7 @@ func (s *FtpClientTestSuite) TearDownTest(c *C) {
 
 //Run once after all tests or benchmarks have finished running.
 func (s *FtpClientTestSuite) TearDownSuite(c *C) {
+
 }
 
 const (
@@ -98,7 +104,6 @@ const (
 	IOFILE    = "ftpsclient.go"
 )
 
-/*
 func (s *FtpClientTestSuite) TestDirectory(c *C) {
 	Directory_S, Err := GL_FtpsClientPtr_X.GetWorkingDirectory()
 	if Err != nil {
@@ -148,43 +153,62 @@ func (s *FtpClientTestSuite) TestDisconnect(c *C) {
 	}
 	s.SetUpTest(c)
 }
-*/
-func (s *FtpClientTestSuite) TestFileUpload(c *C) {
 
-	pData_U8, Err := ioutil.ReadFile("ftpsclient.go")
-	if Err != nil {
-		c.Fatalf("ReadFile error: %v\n", Err)
-	}
-	Err = GL_FtpsClientPtr_X.StoreFile("test2", pData_U8)
-	if Err != nil {
-		c.Fatalf("StoreFile error: %v\n", Err)
-	}
+func (s *FtpClientTestSuite) TestUpload(c *C) {
 
-}
-
-func (s *FtpClientTestSuite) TestFileDownload(c *C) {
-	Err := GL_FtpsClientPtr_X.RetrieveFile("test2", "test3")
+	Err := uploadFile(LOCAL_PATH, HOST_PATH)
 	if Err != nil {
-		c.Fatalf("RetrieveFile error: %v\n", Err)
+		c.Fatalf("Upload error: %v\n", Err)
 	}
 }
 
-/*
+func (s *FtpClientTestSuite) TestDownload(c *C) {
+	Err := uploadFile(LOCAL_PATH, HOST_PATH)
+	if Err != nil {
+		c.Fatalf("Upload error: %v\n", Err)
+	} else {
+		Err := GL_FtpsClientPtr_X.RetrieveFile(HOST_PATH, LOCAL_PATH_RETR)
+		if Err != nil {
+			c.Fatalf("RetrieveFile error: %v\n", Err)
+		}
+	}
+}
+
 func (s *FtpClientTestSuite) TestFileList(c *C) {
-	pDirEntry_X, Err := GL_FtpsClientPtr_X.List()
+	Err := uploadFile(LOCAL_PATH, HOST_PATH)
 	if Err != nil {
-		c.Fatalf("List error: %v\n", Err)
-	}
-	for _, DirEntry_X := range pDirEntry_X {
-		log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
+		c.Fatalf("Upload error: %v\n", Err)
+	} else {
+		//		pDirEntry_X, Err := GL_FtpsClientPtr_X.List()
+		_, Err := GL_FtpsClientPtr_X.List()
+		if Err != nil {
+			c.Fatalf("List error: %v\n", Err)
+		}
+		/*
+			for _, DirEntry_X := range pDirEntry_X {
+							log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
+			}
+		*/
 	}
 }
 
 func (s *FtpClientTestSuite) TestFileDelete(c *C) {
-	Err := GL_FtpsClientPtr_X.DeleteFile("test2")
+	Err := uploadFile(LOCAL_PATH, HOST_PATH)
 	if Err != nil {
-		c.Fatalf("DeleteFile error: %v\n", Err)
+		c.Fatalf("Upload error: %v\n", Err)
+	} else {
+		Err := GL_FtpsClientPtr_X.DeleteFile(HOST_PATH)
+		if Err != nil {
+			c.Fatalf("DeleteFile error: %v\n", Err)
+		}
 	}
-
 }
-*/
+
+func uploadFile(_LocalPath_S, _HostPath_S string) error {
+
+	pData_U8, rRts := ioutil.ReadFile(_LocalPath_S)
+	if rRts == nil {
+		rRts = GL_FtpsClientPtr_X.StoreFile(_HostPath_S, pData_U8)
+	}
+	return rRts
+}

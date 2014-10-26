@@ -320,6 +320,7 @@ func (this *FtpsClient) StoreFile(_RemoteFilepath_S string, _DataArray_U8 []byte
 				rRts = ErrIoError
 			}
 		}
+
 		if rRts == nil {
 			_, _, rRts = this.CloseFtpDataChannel()
 		} else {
