@@ -15,9 +15,8 @@ package ftpsclient
 
 import (
 	//	"fmt"
-	"fmt"
 	. "gopkg.in/check.v1"
-	_ "io/ioutil"
+	"io/ioutil"
 	//	"log"
 	"testing"
 )
@@ -58,7 +57,7 @@ func (s *FtpClientTestSuite) SetUpTest(c *C) {
 	FtpsClientParam_X.SecureFtp_B = false
 	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
 	FtpsClientParam_X.TargetPort_U16 = 21
-	FtpsClientParam_X.Debug_B = false
+	FtpsClientParam_X.Debug_B = true
 	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
 	FtpsClientParam_X.ConnectTimeout_S64 = 2000
 	FtpsClientParam_X.CtrlTimeout_S64 = 1000
@@ -79,7 +78,7 @@ func (s *FtpClientTestSuite) SetUpTest(c *C) {
 	if GL_FtpsClientPtr_X.FtpsParam_X.Id_U32 != CONID {
 		c.Fatalf("Bad param %v instead of %v\n", GL_FtpsClientPtr_X.FtpsParam_X.Id_U32, CONID)
 	}
-	GL_FtpsClientPtr_X.DeleteFile(HOST_PATH)
+	Err = GL_FtpsClientPtr_X.DeleteFile(HOST_PATH)
 }
 
 //Run after each test or benchmark runs.
@@ -191,9 +190,6 @@ func (s *FtpClientTestSuite) TestFileList(c *C) {
 			}
 		*/
 	}
-	for _, DirEntry_X := range pDirEntry_X {
-		log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
-	}
 }
 
 /*
@@ -208,7 +204,7 @@ func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 		}
 	}
 }
-
+*/
 func uploadFile(_LocalPath_S, _HostPath_S string) error {
 
 	pData_U8, rRts := ioutil.ReadFile(_LocalPath_S)
@@ -217,4 +213,3 @@ func uploadFile(_LocalPath_S, _HostPath_S string) error {
 	}
 	return rRts
 }
-*/
