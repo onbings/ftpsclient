@@ -15,8 +15,9 @@ package ftpsclient
 
 import (
 	//	"fmt"
+	"fmt"
 	. "gopkg.in/check.v1"
-	"io/ioutil"
+	_ "io/ioutil"
 	"log"
 	"testing"
 )
@@ -97,7 +98,6 @@ const (
 	IOFILE    = "ftpsclient.go"
 )
 
-/*
 func (s *FtpClientTestSuite) TestDirectory(c *C) {
 	Directory_S, Err := GL_FtpsClientPtr_X.GetWorkingDirectory()
 	if Err != nil {
@@ -147,7 +147,7 @@ func (s *FtpClientTestSuite) TestDisconnect(c *C) {
 	}
 	s.SetUpTest(c)
 }
-*/
+
 func (s *FtpClientTestSuite) TestFileUpload(c *C) {
 
 	pData_U8, Err := ioutil.ReadFile("ftpsclient.go")
@@ -167,16 +167,18 @@ func (s *FtpClientTestSuite) TestFileDownload(c *C) {
 		c.Fatalf("RetrieveFile error: %v\n", Err)
 	}
 }
+
 func (s *FtpClientTestSuite) TestFileList(c *C) {
 	pDirEntry_X, Err := GL_FtpsClientPtr_X.List()
 	if Err != nil {
 		c.Fatalf("List error: %v\n", Err)
 	}
 	for _, DirEntry_X := range pDirEntry_X {
-		log.Println(DirEntry_X)
+		log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
 	}
 }
 
+/*
 func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 	Err := GL_FtpsClientPtr_X.DeleteFile("test2")
 	if Err != nil {
@@ -184,3 +186,4 @@ func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 	}
 
 }
+*/

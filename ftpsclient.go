@@ -287,24 +287,23 @@ func (this *FtpsClient) List() (rDirEntryArray_X []DirEntry, rRts error) {
 	var DirEntryPtr_X *DirEntry
 	var Line_S string
 	rDirEntryArray_X = nil
-	rRts = this.sendRequestToFtpServerDataConn("LIST", 150)
+	rRts = this.sendRequestToFtpServerDataConn("LIST -a", 150)
 	if rRts == nil {
 		pReader_O := bufio.NewReader(this.dataConnection_I)
-		for {
-			Line_S, rRts = pReader_O.ReadString('\n')
-			if rRts == nil {
-				//if rRts == io.EOF {				break			}
-				this.debugInfo("[LIST] " + Line_S)
-				DirEntryPtr_X, rRts = this.parseEntryLine(Line_S)
-				rDirEntryArray_X = append(rDirEntryArray_X, *DirEntryPtr_X)
-			} else {
-				break
+		if pReader_O != nil {
+			for {
+				Line_S, rRts = pReader_O.ReadString('\n')
+				if rRts == nil {
+					//if rRts == io.EOF {				break			}
+					//					this.debugInfo("[LIST] " + Line_S)
+					DirEntryPtr_X, rRts = this.parseEntryLine(Line_S)
+					rDirEntryArray_X = append(rDirEntryArray_X, *DirEntryPtr_X)
+				} else {
+					break
+				}
 			}
-
 		}
-		this.debugInfo("[LIST] End")
-		_, _, rRts = this.readFtpServerResponse(226)
-		this.dataConnection_I.Close()
+		_, _, rRts = this.CloseFtpDataChannel()
 	}
 
 	return
@@ -326,7 +325,7 @@ func (this *FtpsClient) StoreFile(_RemoteFilepath_S string, _DataArray_U8 []byte
 				}
 			}
 		}
-		this.dataConnection_I.Close()
+		_, _, rRts = this.CloseFtpDataChannel()
 	}
 	return
 }
@@ -344,7 +343,7 @@ func (this *FtpsClient) RetrieveFile(_RemoteFilepath_S, _LocalFilepath_S string)
 			}
 			pFile_X.Close()
 		}
-		this.dataConnection_I.Close()
+		_, _, rRts = this.CloseFtpDataChannel()
 	}
 	return
 }
@@ -493,62 +492,80 @@ func (this *FtpsClient) parseEntryLine(_Line_S string) (rDirEntryPtr_X *DirEntry
 	var Time_S string
 	var Size_U64 uint64
 	var Time_X time.Time
+	var FieldArray_S [9]string
 
-	//filename can contains space:  _Line_S="-rwx------ 1 user group 16835936256 May 26 06:40 000000B_!RTN3V}H_Train000002             .TRN"
+	//filename in line can contains space:                        -rwx------ 1 user group 16835936256 May 26 06:40 test            .TRN
+	//Line can contains several space between group and file size -rw-r--r-- 1 ftp ftp          16865 Oct 26 15:49 test2.l
 	rDirEntryPtr_X = nil
 	//	Field_S := strings.Fields(_Line_S)
-	FieldArray_S := strings.SplitN(_Line_S, " ", 9)
+	//FieldArray_S := strings.SplitN(_Line_S, " ", 9)
+	//TEST _Line_S = "-rw-r--r-- 1 ftp ftp          16865 Oct 26 15:49    Atest2  .l"
+
 	rRts = ErrLineFormat
-	if len(FieldArray_S) == 9 {
-		FnStartPos_i := strings.LastIndex(_Line_S, FieldArray_S[7])
-		if FnStartPos_i >= 0 {
-			FnStartPos_i = FnStartPos_i + len(FieldArray_S[7]) - 1
-			rDirEntryPtr_X = &DirEntry{}
-			/*
-				this.debugInfo(fmt.Sprintf("[FTP DBG] line '%s'", _Line_S))
-				for i := 0; i < len(FieldArray_S); i++ {
-					this.debugInfo(fmt.Sprintf("[FTP DBG] %d: '%s'", i, FieldArray_S[i]))
-				}
-			*/
-			// parse type
-			switch FieldArray_S[0][0] {
-			case '-':
-				rDirEntryPtr_X.Type_E = DIRENTRYTYPE_FILE
-			case 'd':
-				rDirEntryPtr_X.Type_E = DIRENTRYTYPE_FOLDER
-			case 'l':
-				rDirEntryPtr_X.Type_E = DIRENTRYTYPE_LINK
-			default:
-				rRts = ErrDirEntry
-			}
+	NbItemScanned_i, Sts := fmt.Sscanf(_Line_S, "%s %s %s %s %s %s %s %s", &FieldArray_S[0], &FieldArray_S[1], &FieldArray_S[2], &FieldArray_S[3], &FieldArray_S[4], &FieldArray_S[5], &FieldArray_S[6], &FieldArray_S[7])
+	if (NbItemScanned_i == 8) && (Sts == nil) {
+		Pos_i := strings.LastIndex(_Line_S, FieldArray_S[7])
+		StartPos_i := Pos_i + len(FieldArray_S[7])
+		if (Pos_i > 0) && (StartPos_i < len(_Line_S)) {
+			FieldArray_S[NbItemScanned_i] = _Line_S[StartPos_i:]
+			FieldArray_S[NbItemScanned_i] = strings.TrimLeft(FieldArray_S[NbItemScanned_i], " ")
+			NbItemScanned_i = NbItemScanned_i + 1
+		}
+		for i := 0; i < NbItemScanned_i; i++ {
+			//			this.debugInfo(fmt.Sprintf("[%d] %s", i, FieldArray_S[i]))
+		}
+		if NbItemScanned_i == 9 {
+			FnStartPos_i := strings.LastIndex(_Line_S, FieldArray_S[7])
+			if FnStartPos_i >= 0 {
+				FnStartPos_i = FnStartPos_i + len(FieldArray_S[7]) - 1
+				rDirEntryPtr_X = &DirEntry{}
+				/*
+					this.debugInfo(fmt.Sprintf("[FTP DBG] line '%s'", _Line_S))
+					for i := 0; i < len(FieldArray_S); i++ {
+						this.debugInfo(fmt.Sprintf("[FTP DBG] %d: '%s'", i, FieldArray_S[i]))
+					}
+				*/
+				// parse type
 
-			// parse size
-			Size_U64, rRts = strconv.ParseUint(FieldArray_S[4], 10, 64)
-			if rRts != nil {
-				//			this.debugInfo(fmt.Sprintf("[FTP DBG] err '%s'", rRts.Error()))
-				rDirEntryPtr_X = nil
-			} else {
-
-				rDirEntryPtr_X.Size_U64 = Size_U64
-				// parse time
-				if strings.Contains(FieldArray_S[7], ":") { // this year
-					Year_i, _, _ := time.Now().Date()
-					Time_S = fmt.Sprintf("%s %s %s %s GMT", FieldArray_S[6], FieldArray_S[5], strconv.Itoa(Year_i)[2:4], FieldArray_S[7])
-				} else { // not this year
-					Time_S = fmt.Sprintf("%s %s %s 00:00 GMT", FieldArray_S[6], FieldArray_S[5], FieldArray_S[7][2:4])
+				switch FieldArray_S[0][0] {
+				case '-':
+					rDirEntryPtr_X.Type_E = DIRENTRYTYPE_FILE
+				case 'd':
+					rDirEntryPtr_X.Type_E = DIRENTRYTYPE_FOLDER
+				case 'l':
+					rDirEntryPtr_X.Type_E = DIRENTRYTYPE_LINK
+				default:
+					rRts = ErrDirEntry
 				}
-				Time_X, rRts = time.Parse("_2 Jan 06 15:04 MST", Time_S)
+
+				// parse size
+				Size_U64, rRts = strconv.ParseUint(FieldArray_S[4], 10, 64)
 				if rRts != nil {
+					//					this.debugInfo(fmt.Sprintf("[FTP DBG] err '%s'", rRts.Error()))
 					rDirEntryPtr_X = nil
 				} else {
-					rDirEntryPtr_X.Time_X = Time_X // TODO set timezone
 
-					// parse name
-					rDirEntryPtr_X.Name_S = strings.TrimRight(FieldArray_S[8], "\r\n")
-					SepIndex_i := strings.LastIndex(rDirEntryPtr_X.Name_S, ".")
-					if SepIndex_i >= 0 {
-						rDirEntryPtr_X.Ext_S = rDirEntryPtr_X.Name_S[SepIndex_i+1:]
-						rDirEntryPtr_X.Name_S = rDirEntryPtr_X.Name_S[:SepIndex_i]
+					rDirEntryPtr_X.Size_U64 = Size_U64
+					// parse time
+					if strings.Contains(FieldArray_S[7], ":") { // this year
+						Year_i, _, _ := time.Now().Date()
+						Time_S = fmt.Sprintf("%s %s %s %s GMT", FieldArray_S[6], FieldArray_S[5], strconv.Itoa(Year_i)[2:4], FieldArray_S[7])
+					} else { // not this year
+						Time_S = fmt.Sprintf("%s %s %s 00:00 GMT", FieldArray_S[6], FieldArray_S[5], FieldArray_S[7][2:4])
+					}
+					Time_X, rRts = time.Parse("_2 Jan 06 15:04 MST", Time_S)
+					if rRts != nil {
+						rDirEntryPtr_X = nil
+					} else {
+						rDirEntryPtr_X.Time_X = Time_X // TODO set timezone
+
+						// parse name
+						rDirEntryPtr_X.Name_S = strings.TrimRight(FieldArray_S[8], "\r\n")
+						SepIndex_i := strings.LastIndex(rDirEntryPtr_X.Name_S, ".")
+						if SepIndex_i >= 0 {
+							rDirEntryPtr_X.Ext_S = rDirEntryPtr_X.Name_S[SepIndex_i+1:]
+							rDirEntryPtr_X.Name_S = rDirEntryPtr_X.Name_S[:SepIndex_i]
+						}
 					}
 				}
 			}
