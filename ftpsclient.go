@@ -115,6 +115,7 @@ func setConBufferSize(_Connection_I net.Conn, _ReadBufferSize_U32 uint32, _Write
 func NewFtpsClient(_FtpsClientParamPtr_X *FtpsClientParam) *FtpsClient {
 	p := new(FtpsClient)
 	p.FtpsParam_X = *_FtpsClientParamPtr_X
+	log.SetFlags(log.Lmicroseconds)
 	return p
 }
 
@@ -123,6 +124,7 @@ func (this *FtpsClient) Connect() (rRts error) {
 
 	rRts = ErrNotConnected
 	this.ctrlConnection_I, Sts = net.DialTimeout("tcp4", fmt.Sprintf("%s:%d", this.FtpsParam_X.TargetHost_S, this.FtpsParam_X.TargetPort_U16), this.FtpsParam_X.ConnectTimeout_S64)
+	this.debugInfo("[FTP CON] Connect to " + fmt.Sprintf("%s:%d", this.FtpsParam_X.TargetHost_S, this.FtpsParam_X.TargetPort_U16))
 	if Sts == nil {
 		Sts = setConBufferSize(this.ctrlConnection_I, this.FtpsParam_X.CtrlReadBufferSize_U32, this.FtpsParam_X.CtrlWriteBufferSize_U32)
 		if Sts == nil {
@@ -395,6 +397,8 @@ func (this *FtpsClient) sendRequestToFtpServer(_Request_S string, _ExpectedReply
 	if rRts == nil {
 		this.debugInfo("[FTP CMD] " + _Request_S)
 		rRts = this.ctrlConnection_I.SetDeadline(time.Now().Add(this.FtpsParam_X.CtrlTimeout_S64))
+		this.debugInfo("[FTP CMD] To " + fmt.Sprintf("%d", this.FtpsParam_X.CtrlTimeout_S64))
+
 		if rRts == nil {
 			_, rRts = this.textProtocolPtr_X.Cmd(_Request_S)
 			if rRts == nil {
