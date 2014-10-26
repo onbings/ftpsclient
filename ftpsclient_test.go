@@ -1,3 +1,16 @@
+// Copyright 2014 OnBings. All rights reserved.
+// Use of this source code is governed by a APACHE-style
+// license that can be found in the LICENSE file.
+
+/*
+	This module implements the 'ftpsclient' package unit test.
+	To run theses test please install Filezilla Ftp server (https://filezilla-project.org/download.php?type=server)
+	and create a ftp server config with a user name 'mc' with pasword 'a'. The ftp server should exposes a 'Seq'
+	directory.
+
+	These unit tests use the 'gocheck' golang test package (https://labix.org/gocheck)
+
+*/
 package ftpsclient
 
 import (
@@ -8,12 +21,16 @@ import (
 	"testing"
 )
 
+//-- GoCheck specific initialization --------------------------------------
+
 // Hook up gocheck into the "go test" runner.
 func Test(t *testing.T) { TestingT(t) }
 
 type FtpClientTestSuite struct{}
 
 var _ = Suite(&FtpClientTestSuite{})
+
+//-- GoCheck specific initialization --------------------------------------
 
 var (
 	GL_FtpsClientPtr_X *FtpsClient
@@ -110,11 +127,9 @@ func TestDirectory(c *C) {
 	}
 }
 
-func TestDisconnect(t *testing.T) {
-	checkTestPrerequisite(t)
-
+func TestDisconnect(c *C) {
 	Err := GL_FtpsClientPtr_X.Disconnect()
-	checkTestError(t, Err, "Disconnect error: %v\n", Err)
+	checkTestError(c, Err, "Disconnect error: %v\n", Err)
 	/*
 		Err = GL_FtpsClientPtr_X.MakeDirectory("bha")
 		if Err != nil {
