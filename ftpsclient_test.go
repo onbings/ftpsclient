@@ -15,8 +15,9 @@ package ftpsclient
 
 import (
 	//	"fmt"
+	"fmt"
 	. "gopkg.in/check.v1"
-	"io/ioutil"
+	_ "io/ioutil"
 	//	"log"
 	"testing"
 )
@@ -190,8 +191,12 @@ func (s *FtpClientTestSuite) TestFileList(c *C) {
 			}
 		*/
 	}
+	for _, DirEntry_X := range pDirEntry_X {
+		log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
+	}
 }
 
+/*
 func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 	Err := uploadFile(LOCAL_PATH, HOST_PATH)
 	if Err != nil {
@@ -212,3 +217,4 @@ func uploadFile(_LocalPath_S, _HostPath_S string) error {
 	}
 	return rRts
 }
+*/
