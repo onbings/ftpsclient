@@ -15,6 +15,7 @@ package ftpsclient
 
 import (
 	//	"fmt"
+	"fmt"
 	. "gopkg.in/check.v1"
 	"io/ioutil"
 	"log"
@@ -167,13 +168,15 @@ func (s *FtpClientTestSuite) TestFileDownload(c *C) {
 		c.Fatalf("RetrieveFile error: %v\n", Err)
 	}
 }
+
+/*
 func (s *FtpClientTestSuite) TestFileList(c *C) {
 	pDirEntry_X, Err := GL_FtpsClientPtr_X.List()
 	if Err != nil {
 		c.Fatalf("List error: %v\n", Err)
 	}
 	for _, DirEntry_X := range pDirEntry_X {
-		log.Println(DirEntry_X)
+		log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
 	}
 }
 
@@ -184,3 +187,4 @@ func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 	}
 
 }
+*/
