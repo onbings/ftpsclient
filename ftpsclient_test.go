@@ -17,6 +17,7 @@ import (
 	//	"fmt"
 	. "gopkg.in/check.v1"
 	"io/ioutil"
+	//"time"
 	//	"log"
 	"testing"
 )
@@ -203,6 +204,36 @@ func (s *FtpClientTestSuite) TestFileDelete(c *C) {
 	}
 }
 
+func (s *FtpClientTestSuite) TestCtrlCmd(c *C) {
+	ReplyCode_i, ReplyMessage_S, Err := GL_FtpsClientPtr_X.SendFtpCtrlCommand("FEAT", 211)
+
+	if Err != nil {
+		c.Fatalf("SendFtpCtrlCommand error: %v %d %s\n", Err, ReplyCode_i, ReplyMessage_S)
+	}
+}
+
+func (s *FtpClientTestSuite) TestDataChannel(c *C) {
+	var DataArray_U8 [0x1000]uint8
+
+	Err := uploadFile(LOCAL_PATH, HOST_PATH)
+	if Err != nil {
+		c.Fatalf("Upload error: %v\n", Err)
+	}
+
+	ReplyCode_i, ReplyMessage_S, Err := GL_FtpsClientPtr_X.OpenFtpDataChannel("LIST", 150)
+	if Err != nil {
+		c.Fatalf("OpenFtpDataChannel error: %v %d %s\n", Err, ReplyCode_i, ReplyMessage_S)
+	}
+	_, _, NbRead_i, Err := GL_FtpsClientPtr_X.ReadFtpDataChannel(true, DataArray_U8[:])
+	if Err != nil {
+		c.Fatalf("ReadFtpDataChannel error: %v\n", Err, NbRead_i)
+	}
+	ReplyCode_i, ReplyMessage_S, Err = GL_FtpsClientPtr_X.CloseFtpDataChannel()
+	if Err != nil {
+		c.Fatalf("CloseFtpDataChannel error: %v %d %s\n", Err, ReplyCode_i, ReplyMessage_S)
+	}
+
+}
 func uploadFile(_LocalPath_S, _HostPath_S string) error {
 
 	pData_U8, rRts := ioutil.ReadFile(_LocalPath_S)

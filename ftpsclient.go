@@ -227,7 +227,7 @@ func (this *FtpsClient) OpenFtpDataChannel(_FtpCommand_S string, _ExpectedReplyC
 	rRts = this.sendRequestToFtpServerDataConn(_FtpCommand_S, _ExpectedReplyCode_i)
 	return
 }
-func (this *FtpsClient) ReadFtpDataChannel(_DataArray_U8 []uint8) (rWaitDuration_S64 time.Duration, rIoDuration_S64 time.Duration, rNbRead_i int, rRts error) {
+func (this *FtpsClient) ReadFtpDataChannel(_ExitAfterFirstRead_B bool, _DataArray_U8 []uint8) (rWaitDuration_S64 time.Duration, rIoDuration_S64 time.Duration, rNbRead_i int, rRts error) {
 	var NbRead_i int
 	var StartWaitTime_X, StartIoTime_X time.Time
 	var FirstIo_B bool
@@ -247,6 +247,9 @@ func (this *FtpsClient) ReadFtpDataChannel(_DataArray_U8 []uint8) (rWaitDuration
 					StartIoTime_X = time.Now()
 					rWaitDuration_S64 = StartIoTime_X.Sub(StartWaitTime_X)
 					FirstIo_B = false
+					if _ExitAfterFirstRead_B {
+						NbMaxToRead_i = 0
+					}
 				}
 				rNbRead_i = rNbRead_i + NbRead_i
 				if rNbRead_i >= NbMaxToRead_i {
