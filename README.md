@@ -1,6 +1,5 @@
-ftpsclient
-==========
-
+FTPS client for Go(lang)
+========================
 Another Ftp(s) client package for the go language.
 This is a non working copy of the package.
 It is under finalization with unit test support.
@@ -19,4 +18,54 @@ It is under finalization with unit test support.
 	- Add secure/unsecure mode
 	- Add timeout support
 	- Add generic Ftp control send command function (SendFtpCommand) to be able to send SITE, NOOP,... ftp command)
+	
+INSTALL 
+========
+go get github.com/onbings/ftpsclient
 
+EXAMPLE 
+========
+```go
+package main
+
+import (          
+	"fmt"
+	"log"
+	"github.com/onbings/ftpsclient"
+)
+
+func main() {                                                                   
+	var FtpsClientParam_X FtpsClientParam
+
+	FtpsClientParam_X.Id_U32 = CONID
+	FtpsClientParam_X.LoginName_S = "mc"
+	FtpsClientParam_X.LoginPassword_S = "a"
+	FtpsClientParam_X.InitialDirectory_S = "/Seq"
+	FtpsClientParam_X.SecureFtp_B = true
+	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
+	FtpsClientParam_X.TargetPort_U16 = 21
+	FtpsClientParam_X.Debug_B = true
+	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
+	FtpsClientParam_X.ConnectTimeout_S64 = 2000
+	FtpsClientParam_X.CtrlTimeout_S64 = 1000
+	FtpsClientParam_X.DataTimeout_S64 = 5000
+	FtpsClientParam_X.CtrlReadBufferSize_U32 = 0
+	FtpsClientParam_X.CtrlWriteBufferSize_U32 = 0
+	FtpsClientParam_X.DataReadBufferSize_U32 = 0x100000
+	FtpsClientParam_X.DataWriteBufferSize_U32 = 0x100000
+
+	FtpsClientPtr_X := NewFtpsClient(&FtpsClientParam_X)
+	if FtpsClientPtr_X == nil {
+		Err := GL_FtpsClientPtr_X.Connect()
+		if Err == nil {
+			DirEntryArray_X, Err = GL_FtpsClientPtr_X.List()
+			if Err == nil {
+				for _, DirEntry_X := range DirEntryArray_X {
+					log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S,DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
+				}
+				Err := FtpsClientPtr_X.Disconnect()
+			}
+		}
+	}
+}
+```

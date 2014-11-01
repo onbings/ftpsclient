@@ -14,11 +14,11 @@
 package ftpsclient
 
 import (
-	//	"fmt"
+	//"fmt"
 	. "gopkg.in/check.v1"
 	"io/ioutil"
 	//"time"
-	//	"log"
+	//"log"
 	"testing"
 )
 
@@ -49,16 +49,17 @@ func (s *FtpClientTestSuite) SetUpSuite(c *C) {
 
 //Run before each test or benchmark starts running.
 func (s *FtpClientTestSuite) SetUpTest(c *C) {
+
 	var FtpsClientParam_X FtpsClientParam
 
 	FtpsClientParam_X.Id_U32 = CONID
 	FtpsClientParam_X.LoginName_S = "mc"
 	FtpsClientParam_X.LoginPassword_S = "a"
 	FtpsClientParam_X.InitialDirectory_S = "/Seq"
-	FtpsClientParam_X.SecureFtp_B = true
+	FtpsClientParam_X.SecureFtp_B = false
 	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
 	FtpsClientParam_X.TargetPort_U16 = 21
-	FtpsClientParam_X.Debug_B = true
+	FtpsClientParam_X.Debug_B = false
 	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
 	FtpsClientParam_X.ConnectTimeout_S64 = 2000
 	FtpsClientParam_X.CtrlTimeout_S64 = 1000
