@@ -57,7 +57,7 @@ func (s *FtpClientTestSuite) SetUpTest(c *C) {
 	FtpsClientParam_X.InitialDirectory_S = "/Seq"
 	FtpsClientParam_X.SecureFtp_B = false
 	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
-	FtpsClientParam_X.TargetPort_U16 = 21
+	FtpsClientParam_X.TargetPort_U16 = 216
 	FtpsClientParam_X.Debug_B = false
 	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
 	FtpsClientParam_X.ConnectTimeout_S64 = 2000
