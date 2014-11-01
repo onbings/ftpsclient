@@ -140,17 +140,21 @@ func (this *FtpsClient) Connect() (rRts error) {
 
 	rRts = ErrNotConnected
 	this.ctrlConnection_I, Sts = net.DialTimeout("tcp4", fmt.Sprintf("%s:%d", this.FtpsParam_X.TargetHost_S, this.FtpsParam_X.TargetPort_U16), this.FtpsParam_X.ConnectTimeout_S64)
-	this.debugInfo("[FTP CON] Connect to " + fmt.Sprintf("%s:%d", this.FtpsParam_X.TargetHost_S, this.FtpsParam_X.TargetPort_U16))
+	this.debugInfo("[FTP CON] Connect to " + fmt.Sprintf("%s:%d->%v", this.FtpsParam_X.TargetHost_S, this.FtpsParam_X.TargetPort_U16, Sts))
 	if Sts == nil {
 		Sts = setConBufferSize(this.ctrlConnection_I, this.FtpsParam_X.CtrlReadBufferSize_U32, this.FtpsParam_X.CtrlWriteBufferSize_U32)
+		this.debugInfo("[FTP CON] setConBufferSize to " + fmt.Sprintf("C %d W %d Sts %v", this.FtpsParam_X.CtrlReadBufferSize_U32, this.FtpsParam_X.CtrlWriteBufferSize_U32, Sts))
 		if Sts == nil {
 			this.textProtocolPtr_X = textproto.NewConn(this.ctrlConnection_I)
 			_, _, Sts = this.readFtpServerResponse(220)
+			this.debugInfo("[FTP CON] Wait 220 " + fmt.Sprintf("Secure %v Sts %v", this.FtpsParam_X.SecureFtp_B, Sts))
 
 			if Sts == nil {
 				if this.FtpsParam_X.SecureFtp_B {
 					rRts = ErrSecure
 					_, _, Sts = this.sendRequestToFtpServer("AUTH TLS", 234)
+					this.debugInfo("[FTP CON] AUTH TLS " + fmt.Sprintf("Sts %v", Sts))
+
 					if Sts == nil {
 						this.ctrlConnection_I = this.upgradeConnectionToTLS(this.ctrlConnection_I)
 						this.textProtocolPtr_X = textproto.NewConn(this.ctrlConnection_I)
@@ -161,6 +165,8 @@ func (this *FtpsClient) Connect() (rRts error) {
 			if Sts == nil {
 				rRts = ErrInvalidLogin
 				_, _, Sts = this.sendRequestToFtpServer(fmt.Sprintf("USER %s", this.FtpsParam_X.LoginName_S), 331)
+				this.debugInfo("[FTP CON] USER " + fmt.Sprintf("%s Sts %v", this.FtpsParam_X.LoginPassword_S, Sts))
+
 				if Sts == nil {
 					_, _, Sts = this.sendRequestToFtpServer(fmt.Sprintf("PASS %s", this.FtpsParam_X.LoginPassword_S), 230)
 					if Sts == nil {
