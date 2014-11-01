@@ -1,6 +1,6 @@
 FTPS client for Go(lang)
 ========================
-Another Ftp(s) client package for the go language.
+Another Ftp client package for the go language with secure support.
 This is a non working copy of the package.
 It is under finalization with unit test support.
 
@@ -8,8 +8,8 @@ It is under finalization with unit test support.
 	an application to a ftp server. Only a small subset of the full FTP/FTPS specification
 	is supported
 
-	It is based on the word made by:
-	- jlaffaye 		github.com/jlaffaye/ftp
+	It is based on the work made by:
+	- jlaffaye 			github.com/jlaffaye/ftp
 	- smallfish 		github.com/smallfish/ftp
 	- Marco Beierer 	github.com/webguerilla/ftps
 
@@ -17,7 +17,9 @@ It is under finalization with unit test support.
 	- Refactored with onbings coding covention
 	- Add secure/unsecure mode
 	- Add timeout support
+	- Add rx and tx buffer sizing support
 	- Add generic Ftp control send command function (SendFtpCommand) to be able to send SITE, NOOP,... ftp command)
+	- Fix a number of problems in LIST command parsing
 	
 INSTALL 
 ========
