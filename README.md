@@ -34,17 +34,18 @@ import (
 	"github.com/onbings/ftpsclient"
 )
 
-func main() {                                                                   
-	var FtpsClientParam_X FtpsClientParam
+func main() {
 
-	FtpsClientParam_X.Id_U32 = CONID
+	var FtpsClientParam_X ftpsclient.FtpsClientParam
+
+	FtpsClientParam_X.Id_U32 = 123
 	FtpsClientParam_X.LoginName_S = "mc"
 	FtpsClientParam_X.LoginPassword_S = "a"
 	FtpsClientParam_X.InitialDirectory_S = "/Seq"
-	FtpsClientParam_X.SecureFtp_B = true
+	FtpsClientParam_X.SecureFtp_B = false
 	FtpsClientParam_X.TargetHost_S = "127.0.0.1"
 	FtpsClientParam_X.TargetPort_U16 = 21
-	FtpsClientParam_X.Debug_B = true
+	FtpsClientParam_X.Debug_B = false
 	FtpsClientParam_X.TlsConfig_X.InsecureSkipVerify = true
 	FtpsClientParam_X.ConnectTimeout_S64 = 2000
 	FtpsClientParam_X.CtrlTimeout_S64 = 1000
@@ -54,16 +55,16 @@ func main() {
 	FtpsClientParam_X.DataReadBufferSize_U32 = 0x100000
 	FtpsClientParam_X.DataWriteBufferSize_U32 = 0x100000
 
-	FtpsClientPtr_X := NewFtpsClient(&FtpsClientParam_X)
-	if FtpsClientPtr_X == nil {
-		Err := GL_FtpsClientPtr_X.Connect()
+	FtpsClientPtr_X := ftpsclient.NewFtpsClient(&FtpsClientParam_X)
+	if FtpsClientPtr_X != nil {
+		Err := FtpsClientPtr_X.Connect()
 		if Err == nil {
-			DirEntryArray_X, Err = GL_FtpsClientPtr_X.List()
+			DirEntryArray_X, Err := FtpsClientPtr_X.List()
 			if Err == nil {
 				for _, DirEntry_X := range DirEntryArray_X {
-					log.Println(fmt.Sprintf("(%d): %s.%s %d bytes %s", DirEntry_X.Type_E, DirEntry_X.Name_S,DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X))
+					fmt.Printf("(%d): %s.%s %d bytes %s\n", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X)
 				}
-				Err := FtpsClientPtr_X.Disconnect()
+				Err = FtpsClientPtr_X.Disconnect()
 			}
 		}
 	}
