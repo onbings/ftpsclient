@@ -1,8 +1,6 @@
 FTPS client for Go(lang)
 ========================
 Another Ftp client package for the go language with secure support.
-This is a non working copy of the package.
-It is under finalization with unit test support.
 
 	Package FtpsClient implements a basic ftp(s) client which can be used to connect
 	an application to a ftp server. Only a small subset of the full FTP/FTPS specification
@@ -18,7 +16,8 @@ It is under finalization with unit test support.
 	- Add secure/unsecure mode
 	- Add timeout support
 	- Add rx and tx buffer sizing support
-	- Add generic Ftp control send command function (SendFtpCommand) to be able to send SITE, NOOP,... ftp command)
+	- Add generic Ftp control send command function (SendFtpCtrlCommand) to be able to send SITE, 
+	  NOOP,... ftp command)
 	- Fix a number of problems in LIST command parsing
 	
 INSTALL 
@@ -66,6 +65,8 @@ func main() {
 				for _, DirEntry_X := range DirEntryArray_X {
 					fmt.Printf("(%d): %s.%s %d bytes %s\n", DirEntry_X.Type_E, DirEntry_X.Name_S, DirEntry_X.Ext_S, DirEntry_X.Size_U64, DirEntry_X.Time_X)
 				}
+				ReplyCode_i, ReplyMessage_S, Err := FtpsClientPtr_X.SendFtpCtrlCommand("FEAT", 211)
+				fmt.Printf("feat %d %s\n", ReplyCode_i, ReplyMessage_S)
 				Err = FtpsClientPtr_X.Disconnect()
 			}
 		}
